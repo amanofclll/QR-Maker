@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #qr-container {
+            padding: 20px;
+            background-color: white;
+            border: 2px solid #000;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        #qr-container canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        #download-link {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>QR Code Generator</h1>
+
+    <input type="text" id="qr-text" placeholder="Enter text or URL" />
+    <button onclick="generateQRCode()">Generate QR Code</button>
+
+    <div id="qr-container"></div>
+
+    <a id="download-link" download="qrcode.png">Download QR Code</a>
+
+    <!-- QRCode.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        function generateQRCode() {
+            // Clear previous QR code
+            document.getElementById("qr-container").innerHTML = "";
+
+            // Get input text
+            var text = document.getElementById("qr-text").value;
+
+            if (text.trim() === "") {
+                alert("Please enter text or a URL.");
+                return;
+            }
+
+            // Create QR code
+            var qr = new QRCode(document.getElementById("qr-container"), {
+                text: text,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",  // Black color for QR code
+                colorLight: "#ffffff",  // White background
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Add more padding around the QR code by creating a high-res canvas with extra white space
+            var canvas = document.querySelector("#qr-container canvas");
+            if (canvas) {
+                var ctx = canvas.getContext("2d");
+                var originalCanvas = canvas;
+
+                // Create a new canvas with more space
+                var paddedCanvas = document.createElement("canvas");
+                var padding = 30; // Adjust padding for more white space
+                paddedCanvas.width = originalCanvas.width + padding * 2;
+                paddedCanvas.height = originalCanvas.height + padding * 2;
+
+                var paddedCtx = paddedCanvas.getContext("2d");
+
+                // Fill the entire padded canvas with white
+                paddedCtx.fillStyle = "#ffffff";
+                paddedCtx.fillRect(0, 0, paddedCanvas.width, paddedCanvas.height);
+
+                // Draw the original QR code in the center of the padded canvas
+                paddedCtx.drawImage(originalCanvas, padding, padding);
+
+                // Replace the original canvas with the padded canvas
+                var qrContainer = document.getElementById("qr-container");
+                qrContainer.innerHTML = ""; // Clear old content
+                qrContainer.appendChild(paddedCanvas);
+
+                // Set the download link
+                var qrImageURL = paddedCanvas.toDataURL("image/png");
+                var downloadLink = document.getElementById("download-link");
+                downloadLink.href = qrImageURL;
+                downloadLink.style.display = 'block';
+                downloadLink.textContent = 'Download QR Code';
+            }
+        }
+    </script>
+
+</body>
+</html>
